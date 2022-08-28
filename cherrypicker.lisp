@@ -34,51 +34,17 @@
 
 ;;; API
 
-(defparameter *style* "
- body {
-     margin: 5% auto;
-     background: #f2f2f2;
-     color: #444444;
-     font-family: Bookman, URW Bookman L, Georgia, serif;
-     font-size: 16px;
-     line-height: 1.8;
-     text-shadow: 0 1px 0 #ffffff;
-     max-width: 73%;
-}
- code {
-    background: white;
-}
- a {
-    border-bottom: 1px solid #444444;
-     color: #444444;
-     text-decoration: none;
-}
- a:hover {
-    border-bottom: 0;
-}
-")
-
 (defparameter *prologue*
-  (format nil "<!DOCTYPE html>
-<html lang=\"en\">
-<head>
-<title>Cherrypicker output</title>
-<meta charset=\"UTF-8\">
-<style>~A</style>
-</head>
-<body>
-"
-          *style*))
+  (asdf:system-relative-pathname :cherrypicker "prologue.html"))
 
-(defparameter *epilogue* "</body>
-</html>
-")
+(defparameter *epilogue*
+  (asdf:system-relative-pathname :cherrypicker "epilogue.html"))
 
 (defun frob (pathname &optional stream)
   (let ((*walking-stream* (or stream *walking-stream*)))
-    (out *prologue*)
+    (out (a:read-file-into-string *prologue*))
     (walk (load-book pathname))
-    (out *epilogue*)))
+    (out (a:read-file-into-string *epilogue*))))
 
 ;;; Walker
 
