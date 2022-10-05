@@ -6,7 +6,7 @@
                     (#:s #:serapeum)
                     (#:ss #:split-sequence)
                     (#:p #:plump))
-  (:export #:frob))
+  (:export #:*walking-stream* #:frob))
 
 (in-package #:cherrypicker)
 
@@ -40,10 +40,23 @@
 (defparameter *epilogue*
   (asdf:system-relative-pathname :cherrypicker "epilogue.html"))
 
-(defun frob (pathname &optional stream)
+(defun find-section (book name)
+  (flet ((fn (element)
+           (when (p:element-p element)
+             (let* ((attributes (p:attributes element))
+                    (actual-name (gethash "name" attributes)))
+               (when (and actual-name (string= name actual-name))
+                 (return-from find-section element))))))
+    (p:traverse book #'fn)))
+
+(defun frob (pathname &optional stream name)
   (let ((*walking-stream* (or stream *walking-stream*)))
     (out (a:read-file-into-string *prologue*))
-    (walk (load-book pathname))
+    (let* ((book (load-book pathname))
+           (real-book (if name
+                          (find-section book name)
+                          book)))
+      (walk real-book))
     (out (a:read-file-into-string *epilogue*))))
 
 ;;; Walker
